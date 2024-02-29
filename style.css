@@ -1,0 +1,16 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  background-color: slategray;
+}
+
+#canvas {
+  border: 1px solid black;
+  background-color: white;
+}
