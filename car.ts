@@ -13,6 +13,7 @@ class Car {
 
   color: string;
 
+  sensor: Sensor;
   controls: Controls;
 
   constructor(
@@ -36,11 +37,13 @@ class Car {
 
     this.color = color;
 
+    this.sensor = new Sensor(this);
     this.controls = new Controls();
   }
 
-  update() {
+  update(roadBorders: RoadBorder[]) {
     this.#move();
+    this.sensor.update(roadBorders);
   }
 
   #move() {
@@ -77,10 +80,10 @@ class Car {
     if (this.speed != 0) {
       const isForward = this.speed > 0;
       if (this.controls.left) {
-        this.angle += 0.03 * (isForward ? 1 : -1);
+        this.angle += 0.01 * (isForward ? 1 : -1);
       }
       if (this.controls.right) {
-        this.angle -= 0.03 * (isForward ? 1 : -1);
+        this.angle -= 0.01 * (isForward ? 1 : -1);
       }
     }
 
@@ -99,5 +102,7 @@ class Car {
     ctx.fill();
 
     ctx.restore();
+
+    this.sensor.draw(ctx);
   }
 }
