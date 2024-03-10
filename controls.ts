@@ -4,13 +4,20 @@ class Controls {
   up: boolean;
   down: boolean;
 
-  constructor() {
+  constructor(type: ControlType) {
     this.left = false;
     this.right = false;
     this.up = false;
     this.down = false;
 
-    this.#addKeyboardListeners();
+    switch (type) {
+      case "USER":
+        this.#addKeyboardListeners();
+        break;
+      case "BOT":
+        this.up = true;
+        break;
+    }
   }
 
   #addKeyboardListeners() {

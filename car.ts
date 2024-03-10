@@ -1,3 +1,5 @@
+type ControlType = "USER" | "BOT";
+
 class Car {
   x: number; //This is the center x dimension of the car
   y: number; //This is the center y dimenison of the car
@@ -13,7 +15,7 @@ class Car {
 
   color: string;
 
-  sensor: Sensor;
+  sensor: Sensor | null;
   controls: Controls;
 
   damaged: boolean;
@@ -24,7 +26,9 @@ class Car {
     y: number,
     width: number,
     height: number,
-    color: string
+    color: string,
+    controlType: ControlType,
+    maxSpeed: number = 3
   ) {
     this.x = x;
     this.y = y;
@@ -32,7 +36,7 @@ class Car {
     this.height = height;
 
     this.speed = 0;
-    this.maxSpeed = 3;
+    this.maxSpeed = maxSpeed;
     this.acceleration = 0.1;
     this.friction = 0.05;
 
@@ -40,25 +44,38 @@ class Car {
 
     this.color = color;
 
-    this.sensor = new Sensor(this);
-    this.controls = new Controls();
+    if (controlType === "USER") {
+      this.sensor = new Sensor(this);
+    } else {
+      this.sensor = null;
+    }
+
+    this.controls = new Controls(controlType);
 
     this.damaged = false;
     this.polygon = this.#createPolygon();
   }
 
-  update(roadBorders: RoadBorder[]) {
+  update(roadBorders: RoadBorder[], traffic: Car[] = []) {
     if (!this.damaged) {
       this.#move();
       this.polygon = this.#createPolygon();
-      this.damaged = this.#assessDamage(roadBorders);
+      this.damaged = this.#assessDamage(roadBorders, traffic);
     }
-    this.sensor.update(roadBorders);
+
+    if (this.sensor) {
+      this.sensor.update(roadBorders, traffic);
+    }
   }
 
-  #assessDamage(borders: [Coord, Coord][]) {
+  #assessDamage(borders: [Coord, Coord][], traffic: Car[]) {
     for (const border of borders) {
       if (polygonIntersection(this.polygon, border)) {
+        return true;
+      }
+    }
+    for (const car of traffic) {
+      if (polygonIntersection(this.polygon, car.polygon)) {
         return true;
       }
     }
@@ -155,6 +172,8 @@ class Car {
     ctx.closePath();
     ctx.fill();
 
-    this.sensor.draw(ctx);
+    if (this.sensor) {
+      this.sensor.draw(ctx);
+    }
   }
 }
