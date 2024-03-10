@@ -21,3 +21,18 @@ function getIntersection(A: Coord, B: Coord, C: Coord, D: Coord) {
 
   return null;
 }
+
+function polygonIntersection(polygon1: Coord[], polygon2: Coord[]) {
+  for (let i = 0; i < polygon1.length; i++) {
+    const A = polygon1[i];
+    const B = polygon1[(i + 1) % polygon1.length];
+    for (let j = 0; j < polygon2.length; j++) {
+      const C = polygon2[j];
+      const D = polygon2[(j + 1) % polygon2.length];
+      if (getIntersection(A, B, C, D)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
