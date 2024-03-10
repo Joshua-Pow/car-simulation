@@ -1,4 +1,4 @@
-type ControlType = "USER" | "BOT";
+type ControlType = "USER" | "AI" | "BOT";
 
 class Car {
   x: number; //This is the center x dimension of the car
@@ -20,6 +20,9 @@ class Car {
 
   damaged: boolean;
   polygon: { x: number; y: number }[];
+
+  brain: NeuralNetwork | null;
+  useBrain: boolean;
 
   constructor(
     x: number,
@@ -44,10 +47,14 @@ class Car {
 
     this.color = color;
 
-    if (controlType === "USER") {
+    this.useBrain = controlType === "AI";
+
+    if (controlType !== "BOT") {
       this.sensor = new Sensor(this);
+      this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
     } else {
       this.sensor = null;
+      this.brain = null;
     }
 
     this.controls = new Controls(controlType);
@@ -65,6 +72,18 @@ class Car {
 
     if (this.sensor) {
       this.sensor.update(roadBorders, traffic);
+      const offsets = this.sensor.readings.map((reading) =>
+        reading == null ? 0 : 1 - reading.offset
+      );
+      const outputs = NeuralNetwork.feedForward(offsets, this.brain!);
+      console.log(outputs);
+
+      if (this.useBrain) {
+        this.controls.up = outputs[0] > 0.5;
+        this.controls.left = outputs[1] > 0.5;
+        this.controls.right = outputs[2] > 0.5;
+        this.controls.down = outputs[3] > 0.5;
+      }
     }
   }
 
